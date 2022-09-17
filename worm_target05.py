@@ -8,7 +8,9 @@ import pandas as pd
 from html2text import html2text
 import matplotlib.pyplot as plt
 
-Base_data = pandas.read_excel(r'template_base.xlsx', index_col=0, header=0)
+# Base_data = pandas.read_excel(r'template_base.xlsx', index_col=0, header=0)
+Base_data_s1 = pandas.read_excel(r'template_base_s.xlsx', index_col=0, header=0,sheet_name=0)
+Base_data_s2 = pandas.read_excel(r'template_base_s.xlsx', index_col=0, header=0,sheet_name=1)
 NEW_LOCAL = 0
 COVER_INNFD = 1
 SPEC_ARE = 2
@@ -57,11 +59,11 @@ def get_src_data(context, type_num):
 
 
 
-def add_Data(el1, el2, type_num):
-    Base_data.loc[el1][type_num] += el2
+def add_Data(db,el1, el2, type_num,op_sign):
+    db.loc[el1][op_sign] = el2
 
 
-def handl_src(src_data, type_num, date):
+def handl_src(src_data, type_num, date,op_sign):
     for elemt in src_data:
         sta_pos = 0
         check_vail = 0
@@ -86,7 +88,12 @@ def handl_src(src_data, type_num, date):
             # el2 = int(elemt_t[break_point:elemt_t.find('例')])
             # print(el1)
             # print(el2)
-            add_Data(el1, el2, type_num)
+            if type_num == NEW_LOCAL:
+                # print('*******************')
+                add_Data(Base_data_s1, el1, el2, NEW_LOCAL, op_sign)
+            else:
+                # print('&&&&&&&&&&&&&&&&&&&&&&&&&')
+                add_Data(Base_data_s2, el1, el2, COVER_INNFD, op_sign)
         except:
             # pass
             print('*****************' + date + 'abnormal****************')
@@ -110,7 +117,7 @@ def creat_context(url):
     else:
         return ''
 
-def get_src_spc(context, context_s):
+def get_src_spc(context, context_s,op_sign):
     # print(context_s)
     context_list = get_src_data(context, SPEC_ARE)
     context_list_s = get_src_data(context_s, SPEC_ARE)
@@ -118,10 +125,9 @@ def get_src_spc(context, context_s):
     # print(context_list_s)
     area_list = ['香港', '澳门', '台湾']
     for i in range(3):
-        Base_data.loc[area_list[i]][NEW_LOCAL] = context_list[i] - context_list_s[i]
+        Base_data_s1.loc[area_list[i]][op_sign] = context_list[i] - context_list_s[i]
 
-
-def crate_bas(day_s=1, day_e=1, list_no=0, spc_flag=False):
+def crate_bas(day_s=1, day_e=1, list_no=0, spc_flag=False,op_sign=0):
     for day in range(day_s - 1, day_e):
         df = pd.read_excel(r'Database/li' + str(list_no + 1) + '.xlsx')
         date = df.loc[day].values[1]
@@ -131,9 +137,9 @@ def crate_bas(day_s=1, day_e=1, list_no=0, spc_flag=False):
             continue
         # try:
         src_loc = get_src_data(context, NEW_LOCAL)
-        handl_src(src_loc, NEW_LOCAL, date)
+        handl_src(src_loc, NEW_LOCAL, date,op_sign)
         src_cov = get_src_data(context, COVER_INNFD)
-        handl_src(src_cov, COVER_INNFD, date)
+        handl_src(src_cov, COVER_INNFD, date,op_sign)
 
         # 获取港澳台新增所需的前一天数据
         if spc_flag:
@@ -142,15 +148,15 @@ def crate_bas(day_s=1, day_e=1, list_no=0, spc_flag=False):
             else:
                 df = pd.read_excel(r'Database/li' + str(list_no + 2) + '.xlsx')
                 context = creat_context(df.loc[0].values[2])
-            get_src_spc(context, context_s)
+            get_src_spc(context, context_s,op_sign)
         # except:
         #      print('*****************' + date + 'error****************')
 
 
-def save_base():
-    # print(Base_data)
-    Base_data.to_excel(r'.\Database\database.xlsx')
-    # Base_data.to_excel(r'.\Database\da'+ date + '.xlsx')
+# def save_base():
+#     # print(Base_data)
+#     Base_data.to_excel(r'.\Database\database.xlsx')
+#     # Base_data.to_excel(r'.\Database\da'+ date + '.xlsx')
 
 
 def func(sei):
@@ -167,9 +173,10 @@ def func(sei):
     return sei
 
 
-def main(day_s=1, day_e=1, list_no=0, spc_flag=False):
-    crate_bas(day_s, day_e, list_no, spc_flag)
-    save_base()
+def main(day_s=1, day_e=1, list_no=0, spc_flag=False,op_sign = 0):
+    crate_bas(day_s, day_e, list_no, spc_flag,op_sign)
+    # save_base()
+
     # print(Base_data['本土新增'].values)
 
     # B1=Base_data.sort_values(by=['本土新增'])
@@ -179,7 +186,12 @@ def main(day_s=1, day_e=1, list_no=0, spc_flag=False):
     # plt.plot(B1.index.values, B2['本土新增'].values)
     # plt.bar(B1.index.values, func(B1['新增无症状'].values),color='pink')
     # plt.show()
-
+    wr = pd.ExcelWriter(r'template_base_s.xlsx')
+    Base_data_s1.to_excel(wr, sheet_name='本土新增')
+    Base_data_s2.to_excel(wr, sheet_name='新增无症状')
+    wr.save()
+    print(Base_data_s1)
+    print(Base_data_s2)
 
 if __name__ == '__main__':
-    main(5, 5, 12, True)
+    main(5, 5, 8, True)
