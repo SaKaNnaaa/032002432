@@ -12,14 +12,19 @@ import numpy as np
 # Base_data = pandas.read_excel(r'template_base.xlsx', index_col=0, header=0)
 
 arr = np.zeros((35,7))
-Base_data_s1 = pd.DataFrame(data=arr,
-                index=['河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南', '湖北', '湖南',
+index_list=['河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南', '湖北', '湖南',
                        '广东', '海南', '四川', '贵州', '云南', '陕西', '甘肃', '青海', '内蒙古', '广西', '西藏', '宁夏', '新疆', '北京',
-                       '天津', '上海', '重庆', '兵团', '香港', '澳门', '台湾'],
+                       '天津', '上海', '重庆', '兵团', '香港', '澳门', '台湾']
+Base_data_s1 = pd.DataFrame(data=arr,
+                index=index_list,
                 columns=[1,2,3,4,5,6,7],
                 )
 Base_data_s1 = Base_data_s1.astype(int)
-Base_data_s2 = Base_data_s1
+Base_data_s2 = pd.DataFrame(data=arr,
+                index=index_list,
+                columns=[1,2,3,4,5,6,7],
+                )
+Base_data_s2 = Base_data_s2.astype(int)
 NEW_LOCAL = 0
 COVER_INNFD = 1
 SPEC_ARE = 2
@@ -80,24 +85,25 @@ def handl_src(src_data, type_num, date,op_sign):
     for elemt in src_data:
         sta_pos = 0
         check_vail = 0
-        for i in range(len(elemt)):
+        for i in range(len(elemt)):                 # 通过‘；’截取前面多余部分
             if elemt[i] == '；':
                 sta_pos = i + 1
                 break
         for i in range(len(elemt)):
-            if elemt[i] == '例':
+            if elemt[i] == '例':                     # 查找字符串是否含‘例’，若有则必定在该字符串末尾
                 check_vail = 1
-        if check_vail == 0:
+        if check_vail == 0:                         # 若字符串中无‘例’，则表明无效数据
             continue
-        elemt_t = elemt[sta_pos:]
+        elemt_t = elemt[sta_pos:]                    # 提出最简字符串，如‘四川36例’
+
         break_point = 0
-        for i in range(len(elemt_t)):
+        for i in range(len(elemt_t)):               # 查找文字和数字分界点
             if elemt_t[i].isdigit():
                 break_point = i
                 break
         try:
-            el1 = elemt_t[:break_point]
-            el2 = int(elemt_t[break_point:len(elemt_t) - 1])
+            el1 = elemt_t[:break_point]                         # 获取省份名字
+            el2 = int(elemt_t[break_point:len(elemt_t) - 1])    # 获取人数
             # el2 = int(elemt_t[break_point:elemt_t.find('例')])
             # print(el1)
             # print(el2)
@@ -150,10 +156,10 @@ def crate_bas(day_s=1, day_e=1, list_no=0, spc_flag=False,op_sign=0):
             continue
         # try:
         src_loc = get_src_data(context, NEW_LOCAL)
+        # print(src_loc)
         handl_src(src_loc, NEW_LOCAL, date,op_sign)
         src_cov = get_src_data(context, COVER_INNFD)
         handl_src(src_cov, COVER_INNFD, date,op_sign)
-
         # 获取港澳台新增所需的前一天数据
         if spc_flag:
             if day < 23:
@@ -190,16 +196,10 @@ def main(day_s=1, day_e=1, list_no=0, spc_flag=False,op_sign = 1):
     crate_bas(day_s, day_e, list_no, spc_flag,op_sign)
     # save_base()
 
-    # print(Base_data['本土新增'].values)
 
-    # B1=Base_data.sort_values(by=['本土新增'])
-    # print(B1['本土新增'])
-    # B2=func(B1['本土新增'].values)
-    # print(B2)
-    # plt.plot(B1.index.values, B2['本土新增'].values)
-    # plt.bar(B1.index.values, func(B1['新增无症状'].values),color='pink')
-    # plt.show()
     wr = pd.ExcelWriter(r'res_databas.xlsx')
+    # print(Base_data_s1)
+    # print(Base_data_s2)
     Base_data_s1.to_excel(wr, sheet_name='本土新增')
     Base_data_s2.to_excel(wr, sheet_name='新增无症状')
     wr.save()
