@@ -186,12 +186,12 @@ def main(day_s=1, day_e=1, list_no=0, spc_flag=False,op_sign = 0):
     # plt.plot(B1.index.values, B2['本土新增'].values)
     # plt.bar(B1.index.values, func(B1['新增无症状'].values),color='pink')
     # plt.show()
-    wr = pd.ExcelWriter(r'template_base_s.xlsx')
+    wr = pd.ExcelWriter(r'res_databas.xlsx')
     Base_data_s1.to_excel(wr, sheet_name='本土新增')
     Base_data_s2.to_excel(wr, sheet_name='新增无症状')
     wr.save()
-    print(Base_data_s1)
-    print(Base_data_s2)
+    # print(Base_data_s1)
+    # print(Base_data_s2)
 
 if __name__ == '__main__':
     main(5, 5, 8, True)
