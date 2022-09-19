@@ -5,11 +5,37 @@ import urllib.request
 from lxml import etree
 import re
 import pandas as pd
+import time
 
 url1 = 'http://www.nhc.gov.cn/xcs/yqtb/list_gzbd'
 url2 = '.shtml'
 url3 = 'http://www.nhc.gov.cn'
 last_page = 41
+
+def date_func():        # 对数据库最后更新的时间记录
+    date_file = open('up_date.txt','r')
+    old_date = date_file.readline()
+    date_file.close()
+    date_file = open('up_date.txt','w')
+    new_date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+    date_file.write(new_date)
+    date_file.close()
+    arr1 = old_date.split(' ')
+    arr2 = new_date.split(' ')
+    a=arr1[0].replace('-', '')
+    a = int(arr1[0].replace('-', ''))  # olddate
+    b = int(arr2[0].replace('-', ''))  # newdate
+    if int(arr1[1][:2]) < 5: a = a - 1
+    if int(arr2[1][:2]) < 5: b = b - 1
+
+    if b > a:                           # 新的有效日期大于旧的有效日期，返回1，更新数据库
+        print('databaseuo')
+        return 1
+    elif a < b:                         # 新的有效日期小于旧的日期，日期可能出错，返回1更新数据库
+        print('**********date waring***********')
+        return 1
+    return 0
+
 
 def crate_tree(url,page):
     headers = {
@@ -51,6 +77,5 @@ def main(start_page = 1,end_page = 1):
             print('No More')
             break
 
-
 if __name__ == '__main__':
-    main()
+    date_func()

@@ -1,25 +1,36 @@
-import worm_target06 as wt
+import worm_target08 as wt
 import worm_database01 as wd
+import handle_DataFrame as hd
 
-def today_data():
-    wd.main()
-    wt.main(spc_flag=True)
-def day7_data():
-    wd.main()
-    wt.main(1,7,spc_flag=True)
-def day7_ever():
-    # wd.main()
-    for i in range(7):
-        wt.main(i+1,i+1,0,True,7-i)
-def dayall_dat():
-    # wd.main(1,50)
-    # print(wd.last_page)
-    for i in range(wd.last_page-1):
-        wt.main(1, 24,i,True)
-    # wt.main(1, 24)
+
+def get_today():
+    database1=hd.creat_D()
+    database2=hd.creat_D()
+    today_list=wt.main(database1, database2, spc_flag=True)
+    print(today_list[0][1])
+    print(today_list[1][1])
+
+# def day7_data():
+#     wd.main()
+#     wt.main(1,7,spc_flag=True)
+# def day7_ever():
+#     # wd.main()
+#     for i in range(7):
+#         wt.main(i+1,i+1,0,True,7-i)
+# def dayall_dat():
+#     # wd.main(1,50)
+#     # print(wd.last_page)
+#     op_list=1
+#     for i in range(wd.last_page-1):
+#         wt.main(1, i,True,op_list)
+
+
+
 def main():
+    if wd.date_func():      # 判断有效日期是否变化，若变化更新数据库
+        wd.main()
     # 获取昨日新增
-    # today_data()
+    get_today()
 
     # 获取一星期新增
     # day7_data()
@@ -29,6 +40,9 @@ def main():
     # *********Error**********
     # 获取全部历史数据
     # dayall_dat()
+
+
+
 
 if __name__=='__main__':
     main()
