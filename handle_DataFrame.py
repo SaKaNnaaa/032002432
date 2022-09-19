@@ -9,12 +9,26 @@ def creat_D():
                   '天津', '上海', '重庆', '兵团', '香港', '澳门', '台湾']
     Base_data = pd.DataFrame(data=arr,
                                 index=index_list,
-                                columns=[1, 2, 3, 4, 5, 6, 7],
                                 )
     Base_data = Base_data.astype(int)
     return Base_data
-
-
+def new_base(Base_data1,Base_data2):
+    wr = pd.ExcelWriter(r'res_databas.xlsx')
+    Base_data1.to_excel(wr, sheet_name='本土新增')
+    Base_data2.to_excel(wr, sheet_name='新增无症状')
+    wr.save()
+# def add_base(Base_data1,Base_data2,day):
+#     if day == 1:
+#         new_base(Base_data1,Base_data2)
+#     else:
+#         base1=pd.read_excel(r'res_databas.xlsx',sheet_name=0,index_col=0)
+#         base2=pd.read_excel(r'res_databas.xlsx',sheet_name=1,index_col=0)
+#         base1.iloc[day]=Base_data1.iloc[0]
+#         base2.iloc[day]=Base_data1.iloc[0]
+#         new_base(base1, base2)
 
 if __name__=='__main__':
+    df=creat_D()
+    df.iloc[0]=[1,2,3,4,5,6,7]
+    print(df.iloc[0])
     pass

@@ -126,11 +126,11 @@ def get_src_spc(Base_data1,context, context_s,op_sign):
     for i in range(3):
         Base_data1.loc[area_list[i]][op_sign] = context_list[i] - context_list_s[i]
 
-def crate_bas(Base_data1,Base_data2,day=1, list_no=0, spc_flag=False,op_sign=0):
-    df = pd.read_excel(r'Database/li' + str(list_no + 1) + '.xlsx')
-    date = df.loc[day].values[1]
+def crate_bas(Base_data1,Base_data2,day, list_no=1, spc_flag=False,op_sign=0):
+    df = pd.read_excel(r'Database/li' + str(list_no) + '.xlsx')
+    date = df.loc[day-1].values[1]
     print(date)
-    context = creat_context(df.loc[day].values[2])
+    context = creat_context(df.loc[day-1].values[2])
     if context=='':
         return
     # try:
@@ -142,26 +142,23 @@ def crate_bas(Base_data1,Base_data2,day=1, list_no=0, spc_flag=False,op_sign=0):
     # 获取港澳台新增所需的前一天数据
     if spc_flag:
         if day < 23:
-            context_s = creat_context(df.loc[day + 1].values[2])
+            context_s = creat_context(df.loc[day].values[2])
         else:
-            df = pd.read_excel(r'Database/li' + str(list_no + 2) + '.xlsx')
+            df = pd.read_excel(r'Database/li' + str(list_no + 1) + '.xlsx')
             context = creat_context(df.loc[0].values[2])
         get_src_spc(Base_data1,context, context_s,op_sign)
     # except:
     #      print('*****************' + date + 'error****************')
 
 
-def save_base(Base_data1,Base_data2):
-    wr = pd.ExcelWriter(r'res_databas.xlsx')
-    Base_data1.to_excel(wr, sheet_name='本土新增')
-    Base_data2.to_excel(wr, sheet_name='新增无症状')
-    wr.save()
 
 
 
-def main(Base_data1,Base_data2,day=1, list_no=0, spc_flag=False,op_sign = 1):
+def main(Base_data1,Base_data2,day=1, spc_flag=False,op_sign = 0, list_no=1):
     # 获取第list_no列表中，第day条信息，spc_flag表示是否记录港澳台地区数据，op_sign记录数据记录在database中的第几列
     crate_bas(Base_data1,Base_data2,day, list_no, spc_flag,op_sign)
+    # print(Base_data1)
+    # print(Base_data2)
     return [Base_data1,Base_data2]
     # save_base(Base_data1,Base_data2)
 
